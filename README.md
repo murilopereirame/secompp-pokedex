@@ -1,16 +1,34 @@
-# pokedex_secompp
+# Pokedex Secompp
 
-A new Flutter project.
+Aplicativo desenvolvido durante o minicurso `Introdução ao desenvolvimento Mobile com Flutter` ministrado na SECOMPP 2022.
 
-## Getting Started
+## **1. Iniciando com o Projeto**
 
-This project is a starting point for a Flutter application.
+### 1.1. - Clonando o repositório
 
-A few resources to get you started if this is your first Flutter project:
+Clone o projeto usando a linha de comando abaixo ou faça download como zip.
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+```bash
+#HTTPS
+https://github.com/murilopereirame/secompp-pokedex.git
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+#SSH
+git@github.com:murilopereirame/secompp-pokedex.git
+```
+
+### 1.2. - Instale as dependências
+
+As dependências desse projeto podem ser localizadas no arquivo `pubspec.yaml`.
+
+```bash
+cd secompp-pokedex
+flutter pub get
+```
+
+### 1.3. - Inicie o App
+
+Para iniciar o projeto, execute o comando abaixo e em seguida escolha uma plataforma.
+
+```bash
+flutter run
+```
