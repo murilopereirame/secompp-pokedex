@@ -3,7 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:pokedex_secompp/classes/pokemon.dart';
 import 'package:pokedex_secompp/classes/type.dart';
 import 'package:pokedex_secompp/components/type_card.dart';
-
+import 'package:intl/intl.dart';
 class PokemonCard extends StatelessWidget {
   final Pokemon pokemon;
   final Function()? onTap;
@@ -34,11 +34,11 @@ class PokemonCard extends StatelessWidget {
                     style: GoogleFonts.montserrat(
                       fontWeight: FontWeight.bold,
                       fontSize: 22,
-                      color: Theme.of(context).highlightColor
+                      color: Theme.of(context).highlightColor,
                     ),
                   ),
                   Text(
-                    pokemon.name,
+                    toBeginningOfSentenceCase(pokemon.name) ?? "",
                     style: GoogleFonts.montserrat(
                     fontWeight: FontWeight.bold,
                     fontSize: 22,
