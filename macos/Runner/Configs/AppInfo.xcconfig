@@ -8,7 +8,7 @@
 PRODUCT_NAME = Pokedex Secompp 2022
 
 // The application's bundle identifier
-PRODUCT_BUNDLE_IDENTIFIER = br.unesp.mr.pereira.pokedexSecompp
+PRODUCT_BUNDLE_IDENTIFIER = br.unesp.pereira.mr.pokedexSecompp
 
 // The copyright displayed in application information
 PRODUCT_COPYRIGHT = Copyright © 2022 Murilo Pereira. All rights reserved.
