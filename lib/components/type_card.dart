@@ -21,7 +21,7 @@ class TypeCard extends StatelessWidget {
           type.name,
           style: GoogleFonts.montserrat(
             color: Theme.of(context).highlightColor,
-            fontSize: 16,
+            fontSize: 14,
           ),        
       ),
     );

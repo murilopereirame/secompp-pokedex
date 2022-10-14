@@ -4,6 +4,7 @@ import 'package:pokedex_secompp/classes/pokemon.dart';
 import 'package:pokedex_secompp/components/pokemon_card.dart';
 import 'package:pokedex_secompp/network.dart';
 import 'package:pokedex_secompp/screens/details.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class PokemonListScreen extends StatefulWidget {
   const PokemonListScreen({super.key});
@@ -16,6 +17,8 @@ class _PokemonListScreenState extends State<PokemonListScreen> {
   ScrollController? _scrollController;  
   final List<Pokemon> _pokeList = [];
   int _page = 0;
+
+  bool _onlyFavorites = false;
   bool _isLoading = false;
 
   @override
@@ -32,7 +35,7 @@ class _PokemonListScreenState extends State<PokemonListScreen> {
     super.dispose();
   }
 
-  void loadPokemons() async {
+  _loadPokemons() async {
     setState(() {
       _isLoading = true;
     });
@@ -47,6 +50,42 @@ class _PokemonListScreenState extends State<PokemonListScreen> {
     }
   }
 
+  _loadFavoritesPokemons() async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    final prefs = await SharedPreferences.getInstance();
+    final List<String> favorites = prefs.getStringList('favorites') ?? [];
+
+    if(_isLoading) {
+      List<Pokemon> tempPkn = await Network.getFavoritePokemonList(favorites, _page);
+      setState(() {
+        _pokeList.addAll(tempPkn);
+        _page++;
+        _isLoading = false;
+      });      
+    }
+  }
+
+  _handleOnlyFavorites() {
+    if(_onlyFavorites) {
+      setState(() {
+        _pokeList.clear();
+        _page = 0;
+        _onlyFavorites = false;
+        _loadPokemons();        
+      });
+    } else {
+      setState(() {
+        _pokeList.clear();
+        _page = 0;
+        _onlyFavorites = true;
+        _loadFavoritesPokemons();
+      });
+    }
+  }
+
   _scrollListener() {
     if(_scrollController == null) {
       return;
@@ -56,7 +95,12 @@ class _PokemonListScreenState extends State<PokemonListScreen> {
     if (_scrollController != null && _scrollController!.offset >= 
     _scrollController!.position.maxScrollExtent && 
     !_scrollController!.position.outOfRange) {
-     loadPokemons();
+      if(_onlyFavorites) {
+        _loadFavoritesPokemons();
+      }
+      else {
+      _loadPokemons();
+      }
     }
   }
 
@@ -94,6 +138,11 @@ class _PokemonListScreenState extends State<PokemonListScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      floatingActionButton: FloatingActionButton(
+        onPressed: _handleOnlyFavorites,        
+        backgroundColor: Colors.red,
+        child: Icon(_onlyFavorites ? Icons.favorite : Icons.favorite_border),
+      ),
       body: Column(
         children: [
           Expanded(
