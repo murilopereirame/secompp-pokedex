@@ -4,6 +4,7 @@ import 'package:pokedex_secompp/classes/pokemon.dart';
 import 'package:pokedex_secompp/components/stats_info.dart';
 import 'package:pokedex_secompp/utils.dart';
 import 'package:pokedex_secompp/components/basic_info.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class PokemonDetailsScreen extends StatefulWidget {
   final Pokemon pokemon;
@@ -14,15 +15,15 @@ class PokemonDetailsScreen extends StatefulWidget {
 }
 
 class _PokemonDetailsScreenState extends State<PokemonDetailsScreen> with TickerProviderStateMixin{
-  late TabController _tabController;
   late ScrollController _scrollController;
 
+  bool _isLoading = true;
+  bool _isFavorite = false;
   bool _transparentAppbar = true;
 
   @override
   void initState() {    
     super.initState();
-    _tabController = TabController(initialIndex: 0, length: 2, vsync: this);
     _scrollController = ScrollController();
 
     _scrollController.addListener(() {
@@ -35,6 +36,44 @@ class _PokemonDetailsScreenState extends State<PokemonDetailsScreen> with Ticker
         setState(()  => _transparentAppbar = false);
       }
     });
+
+    _checkFavorite();
+  }
+
+  _checkFavorite() async {
+    final prefs = await SharedPreferences.getInstance();
+
+    final List<String>? favorites = prefs.getStringList('favorites');
+
+    if(favorites != null && favorites.contains(widget.pokemon.pokedexId.toString())) {
+      setState(() {
+        _isFavorite = true;
+      });
+    }
+
+    setState(() {
+      _isLoading = false;
+    });
+  }
+
+  _handleFavorite() async {
+    final prefs = await SharedPreferences.getInstance();
+
+    final List<String>? favorites = prefs.getStringList('favorites');
+
+    if(_isFavorite) {
+      favorites?.remove(widget.pokemon.pokedexId.toString());
+      setState(() {
+        _isFavorite = false;
+      });
+    } else {
+      favorites?.add(widget.pokemon.pokedexId.toString());
+      setState(() {
+        _isFavorite = true;
+      });
+    }
+
+    prefs.setStringList("favorites", favorites ?? []);
   }
 
   @override
@@ -53,18 +92,23 @@ class _PokemonDetailsScreenState extends State<PokemonDetailsScreen> with Ticker
             fontSize: 28
           ),
         ),
-        actions: const [
-          SizedBox(
-            width: 56,  
-            child: Icon(
-              Icons.favorite_outline, 
-              size: 24,
+        actions: [
+          GestureDetector(
+            onTap: _handleFavorite,
+            child: SizedBox(
+              width: 56,  
+              child: Icon(
+                _isFavorite ? Icons.favorite : Icons.favorite_outline, 
+                color: _isFavorite ? Colors.red : Colors.white,
+                size: 24,
+              )
             )
           )
         ],        
       ),
       extendBodyBehindAppBar: true,
-      body: SingleChildScrollView(
+      body: _isLoading ? const Center(child: CircularProgressIndicator()) : 
+      SingleChildScrollView(
         controller: _scrollController,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,

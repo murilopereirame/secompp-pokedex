@@ -27,6 +27,21 @@ class Network {
     return await Future.wait(Iterable.castFrom(pokemonsList.toList()));
   }
 
+  static Future<List<Pokemon>> getFavoritePokemonList(List<String> favorites, int page) async {
+    int count = page * 15;
+
+    if(favorites.length < count) {
+      return [];
+    }
+    
+    var pokemonsList = favorites.skip(count).map((e) {
+        return getPokemon("https://pokeapi.co/api/v2/pokemon/$e");
+      }
+    );
+    
+    return await Future.wait(Iterable.castFrom(pokemonsList.toList()));
+  }
+
   static Future<Pokemon> getPokemon(String pokemonUrl) async {
     http.Response result = await http.get(
       Uri.parse(pokemonUrl));
