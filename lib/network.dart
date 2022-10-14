@@ -144,7 +144,7 @@ class Network {
 
   static List<Evolution> getNextEvolution(List<dynamic> evoList) {
     List<Evolution> evos = [];
-    for(LinkedHashMap<String, dynamic> evolution in evoList) {
+    for(Map<String, dynamic> evolution in evoList) {
       String basePokemonId = extractIdFromURL(evolution["species"]["url"]) ?? "0";
       List<String> trigger = evolution["evolution_details"]
         .map<String>(
