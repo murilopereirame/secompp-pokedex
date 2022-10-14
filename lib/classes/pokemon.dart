@@ -12,7 +12,7 @@ class Pokemon {
   double height;
   List<String> abilities;
   List<PokemonStat> stats;
-  Map<MultiplierType, Multiplier> multipliers;
+  Map<MultiplierType, PokemonMultiplier> multipliers;
   String generation;
   Evolution evolutionChain;
 

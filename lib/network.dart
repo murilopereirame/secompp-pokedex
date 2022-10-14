@@ -36,7 +36,7 @@ class Network {
     List<PokemonType> types = List<PokemonType>.from(pokemonInfo["types"].map(
       (e) => pokemonTypes[e["type"]["name"]]).toList());
 
-    Map<MultiplierType, Multiplier> pokemonMultipliers = 
+    Map<MultiplierType, PokemonMultiplier> pokemonMultipliers = 
       await calculateMultipliers(pokemonInfo["types"]);
 
     int pokemonId = pokemonInfo["id"];
@@ -44,7 +44,7 @@ class Network {
 
     List<String> pokemonAbilities = 
       pokemonInfo["abilities"].map<String>(
-        (e) => e['ability']['name'].toString()
+        (e) => capitalizeWords(e['ability']['name'].toString(), "-", replace: " ")
       ).toList();
 
     List<PokemonStat> pokemonStats = pokemonInfo["stats"]
@@ -86,7 +86,7 @@ class Network {
       .toString()
       .splitMapJoin(
         RegExp(r"generation-"), 
-        onMatch: (p0) => toBeginningOfSentenceCase(p0.group(0)?.replaceAll("-", " ")) ?? "",
+        onMatch: (p0) => capitalizeWords(p0.group(0) ?? "", "-", replace: " "),
         onNonMatch: (p1) => p1.toUpperCase()
       );
     int genIndex = int.parse(extractIdFromURL(specieInfo["generation"]["url"]) ?? "0");
@@ -107,8 +107,21 @@ class Network {
     Map<String, dynamic> evoChain = jsonDecode(resultChain.body);    
     String basePokemonId = extractIdFromURL(evoChain["chain"]["species"]["url"]) ?? "0";
     
-    Evolution baseEvo = Evolution(int.parse(basePokemonId), ["base"]);
-    baseEvo.pokemonName = evoChain["chain"]["species"]["name"].toString();
+    Evolution baseEvo = Evolution(
+      int.parse(basePokemonId), 
+      ["Base"], 
+      capitalizeWords(
+        evoChain["chain"]["species"]["name"].toString(), 
+        "-", 
+        replace: " "
+      )
+    );
+    baseEvo.pokemonName = capitalizeWords(
+      evoChain["chain"]["species"]["name"].toString(),
+      "-",
+      replace: " "
+    );
+    baseEvo.buildTriggerTarget(evoChain["chain"]["evolution_details"]);
     baseEvo.evolvesTo.addAll(getNextEvolution(evoChain["chain"]["evolves_to"]));
     
     return baseEvo;
@@ -118,11 +131,29 @@ class Network {
     List<Evolution> evos = [];
     for(LinkedHashMap<String, dynamic> evolution in evoList) {
       String basePokemonId = extractIdFromURL(evolution["species"]["url"]) ?? "0";
-      List<String> trigger = evolution["evolution_details"].map<String>((e) => e["trigger"]["name"].toString()).toList();
+      List<String> trigger = evolution["evolution_details"]
+        .map<String>(
+          (e) => 
+            capitalizeWords(
+              e["trigger"]["name"].toString(), 
+              "-", 
+              replace: " "
+            )
+        ).toList();
+      trigger = Set<String>.from(trigger).toList();
       
-      Evolution tempEvo = Evolution(int.parse(basePokemonId), trigger);
-      tempEvo.pokemonName = evolution["species"]["name"].toString();
+      Evolution tempEvo = Evolution(
+        int.parse(basePokemonId), 
+        trigger, 
+        capitalizeWords(evolution["species"]["name"], "-", replace: " ")
+      );
+      tempEvo.pokemonName = capitalizeWords(
+        evolution["species"]["name"].toString(), 
+        "-", 
+        replace: " "
+      );
       tempEvo.evolvesTo.addAll(getNextEvolution(evolution["evolves_to"]));
+      tempEvo.buildTriggerTarget(evolution["evolution_details"]);
       evos.add(tempEvo);
     }
 
