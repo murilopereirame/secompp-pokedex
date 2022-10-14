@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:pokedex_secompp/classes/multiplier.dart';
 import 'package:pokedex_secompp/classes/pokemon_type_color.dart';
 import 'package:pokedex_secompp/classes/type.dart';
+import 'package:pokedex_secompp/network.dart';
 
 Map<String, PokemonType> pokemonTypes = {
   'normal': PokemonType("Normal",
@@ -40,3 +42,88 @@ Map<String, PokemonType> pokemonTypes = {
   'fairy': PokemonType("Fairy",
       PokemonTypeColor(const Color(0xFFD685AD), const Color(0xFFDE2f85))),
 };
+
+
+String? extractIdFromURL(String url) {
+  RegExp regex = RegExp(r'/([^/]*)/$');
+  return regex.allMatches(url).first.group(0)?.replaceAll("/", "");
+}
+
+Future<Map<MultiplierType, Multiplier>> calculateMultipliers(List<dynamic> types) async {
+  Map<String, double> attack = {};
+  Map<String, double> defense = {};
+
+  for(dynamic item in types) {
+    Map<String, dynamic> typeData = await Network
+      .getTypeDetails(item["type"]["url"].toString());
+    
+    for(dynamic relation in typeData["damage_relations"].entries) {
+      String key = relation.key;
+      for(dynamic multiplier in relation.value) {
+        String typeName = multiplier["name"];
+
+        if(key == "double_damage_from") {
+          if(defense.containsKey(typeName)) {
+            defense[typeName] = defense[typeName]! * 2;
+          } else {
+            defense[typeName] = 2;
+          }          
+        } else if(key == "double_damage_to") {
+          if(attack.containsKey(typeName)) {
+            attack[typeName] = attack[typeName]! * 2;
+          } else {
+            attack[typeName] = 2;
+          }
+        } else if(key == "half_damage_from") {
+          if(defense.containsKey(typeName)) {
+            defense[typeName] = defense[typeName]! * 0.5;
+          } else {
+            defense[typeName] = 0.5;
+          }
+        } else if(key == "half_damage_to") {
+          if(attack.containsKey(typeName)) {
+            attack[typeName] = attack[typeName]! * 0.5;
+          } else {
+            attack[typeName] = 0.5;
+          }
+        } else if(key == "no_damage_from") {
+          if(defense.containsKey(typeName)) {
+            defense[typeName] = defense[typeName]! * 0;
+          } else {
+            defense[typeName] = 0;
+          }
+        } else if(key == "half_damage_to") {
+          if(defense.containsKey(typeName)) {
+            defense[typeName] = defense[typeName]! * 0;
+          } else {
+            defense[typeName] = 0;
+          }
+        }
+      }
+    }
+  }
+
+  Map<double, List<String>> attackMultipliers = {};
+  Map<double, List<String>> defenseMultipliers = {};
+
+  attack.forEach((key, value) {
+    if(attackMultipliers.containsKey(value)) {
+      attackMultipliers[value]!.add(key);
+    } else {
+      attackMultipliers[value] = [key];
+    }
+  });
+
+  defense.forEach((key, value) {
+    if(defenseMultipliers.containsKey(value)) {
+      defenseMultipliers[value]!.add(key);
+    } else {
+      defenseMultipliers[value] = [key];
+    }
+  });
+
+  return {
+    MultiplierType.attack : Multiplier(MultiplierType.attack, attackMultipliers),
+    MultiplierType.defense : Multiplier(MultiplierType.defense, defenseMultipliers)
+  };
+}
