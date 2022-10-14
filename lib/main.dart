@@ -8,11 +8,11 @@ void main() {
 class Pokedex extends StatelessWidget {
   const Pokedex({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      debugShowCheckedModeBanner: false,
+      title: 'Pokedex Secompp 2022',
       theme: ThemeData(
           primarySwatch: const MaterialColor(900, {
             50: Color.fromRGBO(112, 145, 154, .1),
