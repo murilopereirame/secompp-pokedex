@@ -1,4 +1,7 @@
+import 'dart:collection';
+
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:pokedex_secompp/classes/multiplier.dart';
 import 'package:pokedex_secompp/classes/pokemon_type_color.dart';
 import 'package:pokedex_secompp/classes/type.dart';
@@ -49,7 +52,15 @@ String? extractIdFromURL(String url) {
   return regex.allMatches(url).first.group(0)?.replaceAll("/", "");
 }
 
-Future<Map<MultiplierType, Multiplier>> calculateMultipliers(List<dynamic> types) async {
+String capitalizeWords(String phrase, String regex, {String? replace}) {
+  return phrase.splitMapJoin(
+    RegExp(regex), 
+    onMatch: (p0) => replace ?? p0.group(0) ?? "",
+    onNonMatch: (p1) => toBeginningOfSentenceCase(p1) ?? ""
+  );
+}
+
+Future<Map<MultiplierType, PokemonMultiplier>> calculateMultipliers(List<dynamic> types) async {
   Map<String, double> attack = {};
   Map<String, double> defense = {};
 
@@ -103,27 +114,34 @@ Future<Map<MultiplierType, Multiplier>> calculateMultipliers(List<dynamic> types
     }
   }
 
-  Map<double, List<String>> attackMultipliers = {};
-  Map<double, List<String>> defenseMultipliers = {};
+  SplayTreeMap<double, List<String>> attackMultipliers = SplayTreeMap();
+  SplayTreeMap<double, List<String>> defenseMultipliers = SplayTreeMap();
 
   attack.forEach((key, value) {
+    String capital = capitalizeWords(key, "-", replace: " ");
+
     if(attackMultipliers.containsKey(value)) {
-      attackMultipliers[value]!.add(key);
+      attackMultipliers[value]!.add(capital);
     } else {
-      attackMultipliers[value] = [key];
+      attackMultipliers[value] = [capital];
     }
   });
 
   defense.forEach((key, value) {
+    String capital = capitalizeWords(key, "-", replace: " ");
+
     if(defenseMultipliers.containsKey(value)) {
-      defenseMultipliers[value]!.add(key);
+      defenseMultipliers[value]!.add(capital);
     } else {
-      defenseMultipliers[value] = [key];
+      defenseMultipliers[value] = [capital];
     }
   });
+  
+  attackMultipliers = SplayTreeMap.from(attackMultipliers, (a, b) => a.compareTo(b));
+  defenseMultipliers = SplayTreeMap.from(defenseMultipliers, (a, b) => a.compareTo(b));
 
   return {
-    MultiplierType.attack : Multiplier(MultiplierType.attack, attackMultipliers),
-    MultiplierType.defense : Multiplier(MultiplierType.defense, defenseMultipliers)
+    MultiplierType.attack : PokemonMultiplier(MultiplierType.attack, Map.from(attackMultipliers)),
+    MultiplierType.defense : PokemonMultiplier(MultiplierType.defense, Map.from(defenseMultipliers))
   };
 }

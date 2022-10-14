@@ -29,7 +29,9 @@ class Pokedex extends StatelessWidget {
           backgroundColor: const Color(0xFFFFFFFF),
           primaryColor: const Color(0xFF000000),
           highlightColor: const Color(0xFFFFFFFF),
-          disabledColor: const Color(0xFFBDB8B8)
+          disabledColor: const Color(0xFFBDB8B8),
+          cardColor: const Color(0xFFEEEEEE),
+          hintColor: const Color(0xFFFEA800)
         ),
       home: const PokemonListScreen()
     );

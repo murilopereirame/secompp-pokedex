@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:intl/intl.dart';
 import 'package:pokedex_secompp/classes/pokemon.dart';
+import 'package:pokedex_secompp/components/stats_info.dart';
+import 'package:pokedex_secompp/utils.dart';
+import 'package:pokedex_secompp/components/basic_info.dart';
 
 class PokemonDetailsScreen extends StatefulWidget {
   final Pokemon pokemon;
@@ -11,16 +13,41 @@ class PokemonDetailsScreen extends StatefulWidget {
   State<PokemonDetailsScreen> createState() => _PokemonDetailsScreenState();
 }
 
-class _PokemonDetailsScreenState extends State<PokemonDetailsScreen> {
+class _PokemonDetailsScreenState extends State<PokemonDetailsScreen> with TickerProviderStateMixin{
+  late TabController _tabController;
+  late ScrollController _scrollController;
+
+  bool _transparentAppbar = true;
+
+  @override
+  void initState() {    
+    super.initState();
+    _tabController = TabController(initialIndex: 0, length: 2, vsync: this);
+    _scrollController = ScrollController();
+
+    _scrollController.addListener(() {
+      if(!mounted) return;
+      
+      if(_scrollController.offset < 450 && !_scrollController.position.outOfRange){                
+        setState(() => _transparentAppbar = true);
+      }
+      if(_scrollController.offset >= 450 && !_scrollController.position.outOfRange){
+        setState(()  => _transparentAppbar = false);
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
+        backgroundColor: _transparentAppbar ? 
+          Colors.transparent : 
+          widget.pokemon.types.first.colors.primary,
         elevation: 0,
         centerTitle: true,
         title: Text(
-          "${toBeginningOfSentenceCase(widget.pokemon.name)} #${widget.pokemon.pokedexId}",
+          "${capitalizeWords(widget.pokemon.name, "-", replace: " ")} #${widget.pokemon.pokedexId}",
           style: GoogleFonts.montserrat(
             fontWeight: FontWeight.bold,
             fontSize: 28
@@ -38,77 +65,51 @@ class _PokemonDetailsScreenState extends State<PokemonDetailsScreen> {
       ),
       extendBodyBehindAppBar: true,
       body: SingleChildScrollView(
+        controller: _scrollController,
         child: Column(
-          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Container(
-              constraints: BoxConstraints(
-                minHeight: 500,
-                minWidth: MediaQuery.of(context).size.width,
-              ),
-              decoration: BoxDecoration(
-                color: widget.pokemon.types.first.colors.primary,
-              ),
-              child: Stack(
-                children: [
-                  Positioned(
-                    bottom: -35,
-                    left: 0,
-                    child: Image.asset("images/pokeball_2.png", scale: .75),                    
+            Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  constraints: BoxConstraints(
+                    minHeight: 500,
+                    minWidth: MediaQuery.of(context).size.width,
                   ),
-                  Padding(
-                    padding: const EdgeInsets.only(top: 50, bottom: 5),
-                    child: Image
-                      .network("https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/${widget.pokemon.pokedexId}.png",
-                      loadingBuilder:
-                        (context, child, loadingProgress) => 
-                          loadingProgress == null ? 
-                            child : 
-                            CircularProgressIndicator(
-                              color: widget.pokemon.types.first.colors.accent
-                            )
+                  decoration: BoxDecoration(
+                    color: widget.pokemon.types.first.colors.primary,
+                  ),
+                  child: Stack(
+                    children: [
+                      Positioned(
+                        bottom: -35,
+                        left: 0,
+                        child: Image.asset("images/pokeball_2.png", scale: .75),                    
                       ),
-                  )
-                ]
-              )
-            ),
-            ConstrainedBox(
-              constraints: const BoxConstraints(
-                maxHeight: 400
-              ),
-              child: DefaultTabController(
-                length: 2, 
-                child: Column(
-                  children: [
-                    TabBar(
-                      indicatorColor: Colors.transparent,
-                      labelColor: Theme.of(context).primaryColor,
-                      labelPadding: const EdgeInsets.only(top: 15, bottom: 15),
-                      labelStyle: GoogleFonts.montserrat(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold
-                      ),
-                      unselectedLabelColor: const Color(0xFFBDB8B8),
-                      tabs: const [
-                        Text('About'),
-                        Text('Stats')
-                      ]
-                    ),
-                    const Expanded(
-                      child: TabBarView(
-                        children: [
-                          Icon(Icons.abc),
-                          Icon(Icons.abc_outlined)
-                        ]
+                      Padding(
+                        padding: const EdgeInsets.only(top: 50, bottom: 5),
+                        child: Image
+                          .network("https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/${widget.pokemon.pokedexId}.png",
+                          loadingBuilder:
+                            (context, child, loadingProgress) => 
+                              loadingProgress == null ? 
+                                child : 
+                                CircularProgressIndicator(
+                                  color: widget.pokemon.types.first.colors.accent
+                                )
+                          ),
                       )
-                    ),
-                  ]
-                )
-              )
-            )
+                    ]
+                  )
+                ),
+              ]
+            ),            
+            BaiscInfoWidget(pokemon: widget.pokemon),
+            StatsInfoWidget(pokemon: widget.pokemon)
           ],
         ),
-      ),
+      )      
     );
   }
 }

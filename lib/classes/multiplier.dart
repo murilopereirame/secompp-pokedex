@@ -2,9 +2,9 @@ enum MultiplierType {
   attack,
   defense
 }
-class Multiplier {
+class PokemonMultiplier {
   MultiplierType type;
   Map<double, List<String>> multipliers;
 
-  Multiplier(this.type, this.multipliers);
+  PokemonMultiplier(this.type, this.multipliers);
 }

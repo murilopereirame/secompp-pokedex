@@ -4,6 +4,7 @@ import 'package:pokedex_secompp/classes/pokemon.dart';
 import 'package:pokedex_secompp/classes/type.dart';
 import 'package:pokedex_secompp/components/type_card.dart';
 import 'package:intl/intl.dart';
+import 'package:pokedex_secompp/utils.dart';
 class PokemonCard extends StatelessWidget {
   final Pokemon pokemon;
   final Function()? onTap;
@@ -38,7 +39,7 @@ class PokemonCard extends StatelessWidget {
                     ),
                   ),
                   Text(
-                    toBeginningOfSentenceCase(pokemon.name) ?? "",
+                    capitalizeWords(pokemon.name, "-", replace: " "),
                     style: GoogleFonts.montserrat(
                     fontWeight: FontWeight.bold,
                     fontSize: 22,
