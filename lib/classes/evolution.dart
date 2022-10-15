@@ -22,7 +22,7 @@ class Evolution {
       }
 
       if(details["item"] != null) {
-        triggers.add("Have ${capitalizeWords(details['item']['name'], '-', replace: ' ')} item");
+        triggers.add("${capitalizeWords(details['item']['name'], '-', replace: ' ')}");
       }
 
       if(details["known_move"] != null) {
